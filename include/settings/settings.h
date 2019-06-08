@@ -26,7 +26,8 @@ extern "C" {
 #define SETTINGS_MAX_DIR_DEPTH	8	/* max depth of settings tree */
 #define SETTINGS_MAX_NAME_LEN	(8 * SETTINGS_MAX_DIR_DEPTH)
 #define SETTINGS_MAX_VAL_LEN	256
-#define SETTINGS_NAME_SEPARATOR	"/"
+#define SETTINGS_NAME_SEPARATOR	'/'
+#define SETTINGS_NAME_END '='
 
 /* pleace for settings additions:
  * up to 7 separators, '=', '\0'
@@ -47,26 +48,27 @@ struct settings_handler {
 	char *name;
 	/**< Name of subtree. */
 
-	int (*h_get)(int argc, char **argv, char *val, int val_len_max);
+	int (*h_get)(const char *key, char *val, int val_len_max);
 	/**< Get values handler of settings items identified by keyword names.
 	 *
 	 * Parameters:
-	 *  - argc - count of item in argv.
-	 *  - argv - array of pointers to keyword names.
-	 *  - val - buffer for a value.
-	 *  - val_len_max - size of that buffer.
+	 *  - key[in] the name with skipped part that was used as name in
+	 *    handler registration
+	 *  - val[out] buffer to receive value.
+	 *  - val_len_max[in] size of that buffer.
 	 */
 
-	int (*h_set)(int argc, char **argv, size_t len,
-		     settings_read_cb read_cb, void *cb_arg);
+	int (*h_set)(const char *key, size_t len, settings_read_cb read_cb,
+		     void *cb_arg);
 	/**< Set value handler of settings items identified by keyword names.
 	 *
 	 * Parameters:
-	 *  - argc - count of item in argv.
-	 *  - argv - array of pointers to keyword names.
-	 *  - len - the size of the data found in the backend.
-	 *  - read_cb - function provided to read the data from the backend.
-	 *  - cb_arg - arguments for the read function provided by the backend.
+	 *  - key[in] the name with skipped part that was used as name in
+	 *    handler registration
+	 *  - len[in] the size of the data found in the backend.
+	 *  - read_cb[in] function provided to read the data from the backend.
+	 *  - cb_arg[in] arguments for the read function provided by the
+	 *    backend.
 	 */
 
 	int (*h_commit)(void);
@@ -112,6 +114,15 @@ int settings_subsys_init(void);
 int settings_register(struct settings_handler *cf);
 
 /**
+ * Deregister a handler for settings items.
+ *
+ * @param cf Structure containing registration info.
+ *
+ * @return 0 on success, non-zero on failure.
+ */
+int settings_deregister(struct settings_handler *cf);
+
+/**
  * Load serialized items from registered persistence sources. Handlers for
  * serialized item subtrees registered earlier will be called for encountered
  * values.
@@ -119,6 +130,15 @@ int settings_register(struct settings_handler *cf);
  * @return 0 on success, non-zero on failure.
  */
 int settings_load(void);
+
+/**
+ * Load limited set of serialized items from registered persistence sources.
+ * Handlers for serialized item subtrees registered earlier will be called for
+ * encountered values that belong to the subtree
+ *
+ * @return 0 on success, non-zero on failure.
+ */
+int settings_load_subtree(const char *subtree);
 
 /**
  * Save currently running serialized items. All serialized items which are different
@@ -162,6 +182,16 @@ int settings_delete(const char *name);
 int settings_commit(void);
 
 /**
+ * Call commit for settings handler that belong to subtree.
+ * This should apply all settings which has been set, but not applied yet.
+ *
+ * @param subtree name of the subtree to be loaded
+ *
+ * @return 0 on success, non-zero on failure.
+ */
+int settings_commit_subtree(const char *subtree);
+
+/**
  * @} settings
  */
 
@@ -191,8 +221,9 @@ struct settings_store {
  * Destinations are registered using a call to @ref settings_dst_register.
  */
 struct settings_store_itf {
-	int (*csi_load)(struct settings_store *cs);
-	/**< Loads all values from storage.
+	int (*csi_load)(struct settings_store *cs, const char *subtree);
+	/**< Loads values from storage limited to subtree defined by subtree. If
+	 * subtree = NULL loads all values.
 	 *
 	 * Parameters:
 	 *  - cs - Corresponding backend handler node
@@ -248,15 +279,42 @@ void settings_dst_register(struct settings_store *cs);
 /**
  * Parses a key to an array of elements and locate corresponding module handler.
  *
- * @param name Key in string format
- * @param name_argc Parsed number of elements.
- * @param name_argv Parsed array of elements.
+ * @param[in] name in string format
+ * @param[out] next remaining of name after matched handler
  *
  * @return settings_handler node on success, NULL on failure.
  */
-struct settings_handler *settings_parse_and_lookup(char *name, int *name_argc,
-						   char *name_argv[]);
+struct settings_handler *settings_parse_and_lookup(const char *name,
+						   const char **next);
 
+
+/*
+ * API for const name processing
+ */
+
+/**
+ * Compares the start of name with a key
+ *
+ * @param[in] name in string format
+ * @param[in] key comparison string
+ * @param[out] next pointer to remaining of name (excluding separator)
+ *
+ * @return 0: no match
+ *         1: match, next can be used to check if match is full
+ */
+int settings_name_steq(const char *name, const char *key, const char **next);
+
+/**
+ * Splits up name in part before and after first separator ('/')
+ *
+ * @param[in] name in string format
+ * @param[out] argv part of name before first separator ('/')
+ * @param[out] next pointer to remaining of name (excluding separator)
+ *
+ * @return 0: there is no separator in name, argv contains name
+ *         1: there is a separator in name
+ */
+int settings_name_split(const char *name, char *argv, const char **next);
 
 /*
  * API for runtime settings
