@@ -125,15 +125,16 @@ int settings_load(void);
 /**
  * Load limited set of serialized items from registered persistence sources.
  * Handlers for serialized item subtrees registered earlier will be called for
- * encountered values that belong to the subtree
+ * encountered values that belong to the subtree.
  *
+ * @param[in] subtree name of the subtree to be loaded.
  * @return 0 on success, non-zero on failure.
  */
 int settings_load_subtree(const char *subtree);
 
 /**
- * Save currently running serialized items. All serialized items which are different
- * from currently persisted values will be saved.
+ * Save currently running serialized items. All serialized items which are
+ * different from currently persisted values will be saved.
  *
  * @return 0 on success, non-zero on failure.
  */
@@ -176,7 +177,7 @@ int settings_commit(void);
  * Call commit for settings handler that belong to subtree.
  * This should apply all settings which has been set, but not applied yet.
  *
- * @param subtree name of the subtree to be loaded.
+ * @param[in] subtree name of the subtree to be committed.
  *
  * @return 0 on success, non-zero on failure.
  */
@@ -294,8 +295,8 @@ struct settings_handler *settings_parse_and_lookup(const char *name,
  * Some examples:
  * settings_name_steq("bt/btmesh/iv", "b", &next) returns 1, next="t/btmesh/iv"
  * settings_name_steq("bt/btmesh/iv", "bt", &next) returns 1, next="btmesh/iv"
- * settings_name_steq("bt/btmesh/iv", "bt/", &next) returns 1, next="btmesh/iv"
- * settings_name_steq("bt/btmesh/iv", "bta", &next) returns 0
+ * settings_name_steq("bt/btmesh/iv", "bt/", &next) returns 0, next=NULL
+ * settings_name_steq("bt/btmesh/iv", "bta", &next) returns 0, next=NULL
  *
  * REMARK: This routine could be simplified if the settings_handler names
  * would include a separator at the end.

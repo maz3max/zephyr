@@ -49,16 +49,6 @@ static void test_support_rtn(void)
 	zassert_not_null(next2, "_steq comparison next error");
 	zassert_equal_ptr(next2, test2+9, "next points to wrong location");
 
-	/* partial match: return 1, next <> NULL */
-	rc = settings_name_steq(test1, "bt/", &next1);
-	zassert_true(rc == 1, "_steq comparison failure");
-	zassert_not_null(next1, "_steq comparison next error");
-	zassert_equal_ptr(next1, test1+3, "next points to wrong location");
-	rc = settings_name_steq(test2, "bt/", &next2);
-	zassert_true(rc == 1, "_steq comparison failure");
-	zassert_not_null(next2, "_steq comparison next error");
-	zassert_equal_ptr(next2, test2+3, "next points to wrong location");
-
 	/* no match: return 0, next = NULL */
 	rc = settings_name_steq(test1, "bta", &next1);
 	zassert_true(rc == 0, "_steq comparison failure");
@@ -67,15 +57,13 @@ static void test_support_rtn(void)
 	zassert_true(rc == 0, "_steq comparison failure");
 	zassert_is_null(next2, "_steq comparison next error");
 
-	/* match: return 1, next = "t/a/b/c/d" */
+	/* no match: return 0, next = NULL */
 	rc = settings_name_steq(test1, "b", &next1);
-	zassert_true(rc == 1, "_steq comparison failure");
-	zassert_not_null(next1, "_steq comparison next error");
-	zassert_equal_ptr(next1, test1+1, "next points to wrong location");
+	zassert_true(rc == 0, "_steq comparison failure");
+	zassert_is_null(next1, "_steq comparison next error");
 	rc = settings_name_steq(test2, "b", &next2);
-	zassert_true(rc == 1, "_steq comparison failure");
-	zassert_not_null(next2, "_steq comparison next error");
-	zassert_equal_ptr(next2, test2+1, "next points to wrong location");
+	zassert_true(rc == 0, "_steq comparison failure");
+	zassert_is_null(next2, "_steq comparison next error");
 
 	/* first separator: return 2, next <> NULL */
 	rc = settings_name_next(test1, &next1);
