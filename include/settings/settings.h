@@ -288,7 +288,17 @@ struct settings_handler *settings_parse_and_lookup(const char *name,
  *
  * @param[in] name in string format
  * @param[in] key comparison string
- * @param[out] next pointer to remaining of name (excluding separator)
+ * @param[out] next pointer to remaining of name, when the remaining part
+ *             starts with a separator the separator is removed from next
+ *
+ * Some examples:
+ * settings_name_steq("bt/btmesh/iv", "b", &next) returns 1, next="t/btmesh/iv"
+ * settings_name_steq("bt/btmesh/iv", "bt", &next) returns 1, next="btmesh/iv"
+ * settings_name_steq("bt/btmesh/iv", "bt/", &next) returns 1, next="btmesh/iv"
+ * settings_name_steq("bt/btmesh/iv", "bta", &next) returns 0
+ *
+ * REMARK: This routine could be simplified if the settings_handler names
+ * would include a separator at the end.
  *
  * @return 0: no match
  *         1: match, next can be used to check if match is full

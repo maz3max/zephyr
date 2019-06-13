@@ -87,17 +87,19 @@ int settings_name_steq(const char *name, const char *key, const char **next)
 		return 0;
 	}
 
-	if (*name == SETTINGS_NAME_SEPARATOR) {
-		if (next) {
-			*next = name + 1;
-		}
-		return 1;
-	}
-
 	if ((*name == SETTINGS_NAME_END) || (*name == '\0')) {
 		return 1;
 	}
-	return 0;
+
+	if (*name == SETTINGS_NAME_SEPARATOR) {
+		name++;
+	}
+
+	if (next) {
+		*next = name;
+	}
+
+	return 1;
 }
 
 int settings_name_next(const char *name, const char **next)

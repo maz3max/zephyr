@@ -235,7 +235,10 @@ int c2_handle_get(const char *name, char *val, int val_len_max)
 	const char *next;
 	char argv[32];
 
-	if (settings_name_split(name, argv, &next) && !next) {
+	len = settings_name_next(name, &next);
+	if (len && !next) {
+		strncpy(argv, name, len);
+		argv[len] = '\0';
 		valptr = c2_var_find(argv);
 		if (!valptr) {
 			return -ENOENT;
@@ -263,7 +266,10 @@ int c2_handle_set(const char *name, size_t len, settings_read_cb read_cb,
 
 	int rc;
 
-	if (settings_name_split(name, argv, &next) && !next) {
+	len = settings_name_next(name, &next);
+	if (len && !next) {
+		strncpy(argv, name, len);
+		argv[len] = '\0';
 		valptr = c2_var_find(argv);
 		if (!valptr) {
 			return -ENOENT;
