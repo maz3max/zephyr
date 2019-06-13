@@ -62,21 +62,14 @@ end:
 	return rc;
 }
 
-int settings_deregister(struct settings_handler *handler)
-{
-	bool found;
-
-	k_mutex_lock(&settings_lock, K_FOREVER);
-	found = sys_slist_find_and_remove(&settings_handlers, &handler->node);
-	k_mutex_unlock(&settings_lock);
-
-	return found ? 0 : -EINVAL;
-}
-
 int settings_name_steq(const char *name, const char *key, const char **next)
 {
 	if (next) {
 		*next = NULL;
+	}
+
+	if ((!name) || (!key)) {
+		return 0;
 	}
 
 	/* name might come from flash directly, in flash the name would end
@@ -104,14 +97,19 @@ int settings_name_steq(const char *name, const char *key, const char **next)
 	if ((*name == SETTINGS_NAME_END) || (*name == '\0')) {
 		return 1;
 	}
-
 	return 0;
 }
 
-int settings_name_split(const char *name, char *argv, const char **next)
+int settings_name_next(const char *name, const char **next)
 {
+	int rc = 0;
+
 	if (next) {
 		*next = NULL;
+	}
+
+	if (!name) {
+		return 0;
 	}
 
 	/* name might come from flash directly, in flash the name would end
@@ -120,24 +118,18 @@ int settings_name_split(const char *name, char *argv, const char **next)
 	 */
 	while ((*name != '\0') && (*name != SETTINGS_NAME_END) &&
 	       (*name != SETTINGS_NAME_SEPARATOR)) {
-		*argv++ = *name++;
+		rc++;
+		name++;
 	}
 
-
 	if (*name == SETTINGS_NAME_SEPARATOR) {
-		*argv = '\0';
 		if (next) {
 			*next = name + 1;
 		}
-		return 1;
+		return rc;
 	}
 
-	if ((*name == '\0') || (*name == SETTINGS_NAME_END)) {
-		*argv = '\0';
-		return 1;
-	}
-
-	return 0;
+	return rc;
 }
 
 struct settings_handler *settings_parse_and_lookup(const char *name,
@@ -180,7 +172,7 @@ int settings_commit_subtree(const char *subtree)
 
 	rc = 0;
 	SYS_SLIST_FOR_EACH_CONTAINER(&settings_handlers, ch, node) {
-		if (subtree && !settings_name_steq(subtree, ch->name, NULL)) {
+		if (subtree && !settings_name_steq(ch->name, subtree, NULL)) {
 			continue;
 		}
 		if (ch->h_commit) {

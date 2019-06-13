@@ -114,15 +114,6 @@ int settings_subsys_init(void);
 int settings_register(struct settings_handler *cf);
 
 /**
- * Deregister a handler for settings items.
- *
- * @param cf Structure containing registration info.
- *
- * @return 0 on success, non-zero on failure.
- */
-int settings_deregister(struct settings_handler *cf);
-
-/**
  * Load serialized items from registered persistence sources. Handlers for
  * serialized item subtrees registered earlier will be called for encountered
  * values.
@@ -185,7 +176,7 @@ int settings_commit(void);
  * Call commit for settings handler that belong to subtree.
  * This should apply all settings which has been set, but not applied yet.
  *
- * @param subtree name of the subtree to be loaded
+ * @param subtree name of the subtree to be loaded.
  *
  * @return 0 on success, non-zero on failure.
  */
@@ -305,16 +296,16 @@ struct settings_handler *settings_parse_and_lookup(const char *name,
 int settings_name_steq(const char *name, const char *key, const char **next);
 
 /**
- * Splits up name in part before and after first separator ('/')
+ * determine the number of characters before the first separator
  *
  * @param[in] name in string format
- * @param[out] argv part of name before first separator ('/')
  * @param[out] next pointer to remaining of name (excluding separator)
  *
- * @return 0: there is no separator in name, argv contains name
- *         1: there is a separator in name
+ * @return position of the first separator, in case no separator was found this
+ * is the size of name
+ *
  */
-int settings_name_split(const char *name, char *argv, const char **next);
+int settings_name_next(const char *name, const char **next);
 
 /*
  * API for runtime settings
