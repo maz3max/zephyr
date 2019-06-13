@@ -301,7 +301,7 @@ int settings_name_steq(const char *name, const char *key, const char **next);
  * @param[in] name in string format
  * @param[out] next pointer to remaining of name (excluding separator)
  *
- * @return position of the first separator, in case no separator was found this
+ * @return index of the first separator, in case no separator was found this
  * is the size of name
  *
  */
