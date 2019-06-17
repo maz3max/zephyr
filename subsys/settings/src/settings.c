@@ -37,25 +37,12 @@ int settings_register(struct settings_handler *handler)
 	k_mutex_lock(&settings_lock, K_FOREVER);
 
 	SYS_SLIST_FOR_EACH_CONTAINER(&settings_handlers, ch, node) {
-		/* generate the list in reverse alphabetical order, this will
-		 * guarantee the correct order of processing when subtrees
-		 * are registered. An example list should look like:
-		 *   bt/mesh/ttt/aaa
-		 *   bt/mesh/ttt
-		 *   bt/mesh
-		 *   bt
-		 * each of these can be registered independently.
-		 */
-		if (strcmp(handler->name, ch->name) < 0) {
-			break;
-		}
 		if (strcmp(handler->name, ch->name) == 0) {
 			rc = -EEXIST;
 			goto end;
 		}
 	}
-
-	sys_slist_insert(&settings_handlers, &ch->node, &handler->node);
+	sys_slist_append(&settings_handlers, &handler->node);
 	rc = 0;
 end:
 	k_mutex_unlock(&settings_lock);
@@ -136,14 +123,27 @@ int settings_name_next(const char *name, const char **next)
 struct settings_handler *settings_parse_and_lookup(const char *name,
 						   const char **next)
 {
-	struct settings_handler *ch;
+	struct settings_handler *ch, *bestmatch;
+	const char *tmpnext;
+
+	bestmatch = NULL;
+	if (next) {
+		*next = NULL;
+	}
 
 	SYS_SLIST_FOR_EACH_CONTAINER(&settings_handlers, ch, node) {
-		if (settings_name_steq(name, ch->name, next)) {
-			return ch;
+		if (settings_name_steq(name, ch->name, &tmpnext)) {
+			if ((!bestmatch) ||
+			    (settings_name_steq(ch->name,
+						bestmatch->name, NULL))) {
+				bestmatch = ch;
+				if (next) {
+					*next = tmpnext;
+				}
+			}
 		}
 	}
-	return NULL;
+	return bestmatch;
 }
 
 int settings_commit(void)
