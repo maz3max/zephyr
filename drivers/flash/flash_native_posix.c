@@ -137,7 +137,7 @@ static int flash_native_posix_init(struct device *dev)
 		data->flash_path = default_flash_path;
 	}
 
-	data->fd = open(data->flash_path, O_RDWR | O_CREAT, (mode_t)0600);
+	data->fd = open(data->flash_path, O_RDWR | O_CREAT | O_TRUNC, (mode_t)0600);
 	if (data->fd == -1) {
 		posix_print_warning("Failed to open flash device file "
 				    "%s: %s\n",
