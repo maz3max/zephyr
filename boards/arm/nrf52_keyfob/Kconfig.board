@@ -1,0 +1,8 @@
+# Sparkfun nRF52832 breakout board configuration
+
+# Copyright (c) 2022 Maximilian Deubel
+# SPDX-License-Identifier: Apache-2.0
+
+config BOARD_NRF52_KEYFOB
+	bool "nRF52 KEYFOB"
+	depends on SOC_NRF52832_QFAA

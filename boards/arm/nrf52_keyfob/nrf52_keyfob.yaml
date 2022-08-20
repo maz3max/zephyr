@@ -1,0 +1,10 @@
+identifier: nrf52_keyfob
+name: nRF52832 keyfob
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+  - gnuarmemb
+  - xtools
+ram: 64
+flash: 512
