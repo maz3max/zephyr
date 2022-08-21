@@ -1,0 +1,34 @@
+# 3-Axis, +/-8g Digital Accelerometer
+
+# Copyright (c) 2022 Maximilian Deubel
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig KX022
+	bool "KX022 Three Axis I2C/SPI accelerometer"
+	default y
+	depends on DT_HAS_KIONIX_KX022_ENABLED
+	select I2C if $(dt_compat_on_bus,$(DT_COMPAT_KIONIX_KX022),i2c)
+	select SPI if $(dt_compat_on_bus,$(DT_COMPAT_KIONIX_KX022),spi)
+	help
+	  Enable driver for KX022 Three-Axis Digital Accelerometers.
+
+if KX022
+
+choice KX022_BUS_TYPE
+	prompt "Interface type"
+	default KX022_I2C if $(dt_compat_on_bus,$(DT_COMPAT_KIONIX_KX022),i2c)
+	default KX022_SPI if $(dt_compat_on_bus,$(DT_COMPAT_KIONIX_KX022),spi)
+	help
+	  Select interface the digital interface type for the KX022
+
+config KX022_I2C
+	depends on I2C
+	bool "I2C Interface"
+
+config KX022_SPI
+	depends on SPI
+	bool "SPI Interface"
+
+endchoice
+
+endif # ADXL372
