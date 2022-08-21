@@ -27,6 +27,7 @@
 		led0 = &led0;
 		sw0 = &button0;
 		watchdog0 = &wdt0;
+		accel0 = &kx022;
 	};
 
 	leds {
@@ -40,10 +41,17 @@
 	buttons {
 		compatible = "gpio-keys";
 		button0: button_0 {
-			/* gpio flags need validation */
 			gpios = <&gpio0 25 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
 			label = "Button";
 		};
+	};
+
+	vbatt {
+		compatible = "voltage-divider";
+		io-channels = <&adc 0>;
+		output-ohms = <100000>;
+		full-ohms = <(100000 + 100000)>;
+		power-gpios = <&gpio0 3 GPIO_ACTIVE_LOW>;
 	};
 };
 
