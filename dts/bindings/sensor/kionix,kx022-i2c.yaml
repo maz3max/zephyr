@@ -1,0 +1,37 @@
+# Copyright (c) 2022 Maximilian Deubel
+# SPDX-License-Identifier: Apache-2.0
+
+description: KX022/KX122 3-axis accelerometer
+
+compatible: "kionix,kx022"
+
+include: i2c-device.yaml
+
+properties:
+    int1-gpios:
+      type: phandle-array
+      required: false
+      description: |
+        The INT1 signal defaults to active high as produced by the
+        sensor.  The property value should ensure the flags properly
+        describe the signal that is presented to the driver.
+    tilt-axis-mask:
+      type: uint8-array
+      default: [1,1,1,1,1,1]
+      description:
+        Choose which directions generate a tilt interrupt.
+        Zero values disable the interrupts. Six values are needed (x-,x+,y-,y+,z-,z+).
+    tilt-timer:
+      type: uint8
+      default: 0
+        Zero values disable the interrupts. Six values are needed (x-,x+,y-,y+,z-,z+).
+    motion-timer:
+      type: uint8
+      default: 0
+    single-tap-detection:
+      type: boolean
+      default: false
+      default: 0
+    double-tap-detection:
+      type: boolean
+      default: false
