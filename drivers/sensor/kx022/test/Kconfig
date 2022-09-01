@@ -1,0 +1,6 @@
+# Bluetooth Controller configuration options for ISO-AL Unit Tests
+
+# Copyright (c) 2022 Oticon A/S
+# SPDX-License-Identifier: Apache-2.0
+
+source "Kconfig.zephyr"

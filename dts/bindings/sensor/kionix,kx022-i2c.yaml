@@ -24,7 +24,13 @@ properties:
     tilt-timer:
       type: uint8
       default: 0
-        Zero values disable the interrupts. Six values are needed (x-,x+,y-,y+,z-,z+).
+      description:
+        Zero values disable the tilt interrupts. Six values are needed (x-,x+,y-,y+,z-,z+).
+    tilt-angle:
+      type: uint8
+      default: 26
+      description:
+        Low-level threshold tilt threshold in degrees
     motion-timer:
       type: uint8
       default: 0
